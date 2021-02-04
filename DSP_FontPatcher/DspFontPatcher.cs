@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using HarmonyLib.Tools;
 using TranslationCommon;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -13,7 +16,7 @@ using UnityEngine.UI;
 
 namespace DspFontPatcher
 {
-    [BepInPlugin("org.kremnev8.plugins.dspfontpatcher", "DSP Font Patcher", "0.1.0.0")]
+    [BepInPlugin("org.kremnev8.plugins.dspfontpatcher", "DSP Font Patcher", "0.1.0.1")]
     public class DspFontPatcher : BaseUnityPlugin
     {
         public static ManualLogSource logger;
@@ -73,7 +76,7 @@ namespace DspFontPatcher
         private void LevelLoaded(Scene scene, LoadSceneMode mode)
         {
             logDebug("Level loaded");
-            Invoke(nameof(FixLater), 5);
+            Invoke(nameof(FixLater), 3);
         }
 
         private void FixLater()
@@ -315,12 +318,12 @@ namespace DspFontPatcher
     static class UIPlanetGlobePatch
     {
         [HarmonyPostfix]
-        static void Postfix(Text ___geoInfoText, Text ___positionText3)
+        static void Postfix(Text ___geoInfoText)
         {
             DspFontPatcher.logDebug("Patching UIStarmap");
 
             ___geoInfoText.font = DspFontPatcher.newFont;
-            ___positionText3.font = DspFontPatcher.newFont;
+            //___positionText3.font = DspFontPatcher.newFont;
 
         }
     }
@@ -329,9 +332,16 @@ namespace DspFontPatcher
     static class UITechNodePatch
     {
         [HarmonyPostfix]
-        static void Postfix(Text ___progressSpeedText, Text ___techDescText, Text ___unlockText)
+        static void Postfix(Text ___progressSpeedText, Text ___techDescText, Text ___unlockText, RectTransform ___unlockGroup)
         {
             DspFontPatcher.logDebug("Patching UITechNode");
+
+            Transform trs = ___unlockGroup.Find("unlock-label");
+            if (trs != null)
+            {
+                RectTransform rtrs = (RectTransform) trs;
+                rtrs.anchoredPosition = new Vector2(-5,10);
+            }
 
             ___progressSpeedText.font = DspFontPatcher.newFont;
             ___techDescText.font = DspFontPatcher.newFont;
@@ -387,4 +397,65 @@ namespace DspFontPatcher
             ___keyText.font = DspFontPatcher.newFont;
         }
     }
+
+    [HarmonyPatch(typeof(UIAutoSave), "_OnOpen")]
+    static class UIAutoSavePatch
+    {
+        [HarmonyPostfix]
+        static void Postfix(Text ___saveText)
+        {
+            DspFontPatcher.logDebug("Patching UIAutoSave");
+
+            ___saveText.font = DspFontPatcher.newFont;
+        }
+    }
+    
+    [HarmonyPatch(typeof(UIHandTip), "_OnOpen")]
+    static class UIHandTipPatch
+    {
+        [HarmonyPostfix]
+        static void Postfix(Text ___tipText)
+        {
+            DspFontPatcher.logDebug("Patching UIHandTip");
+
+            ___tipText.font = DspFontPatcher.newFont;
+        }
+    }
+    
+    
+/*
+/* 0x000DD05F 02            IL_0337: ldarg.0
+/* 0x000DD060 7B1E190004    IL_0338: ldfld     class [UnityEngine.UI]UnityEngine.UI.Text UITechNode::unlockText
+/* 0x000DD065 6FD405000A    IL_033D: callvirt  instance float32 [UnityEngine.UI]UnityEngine.UI.Text::get_preferredWidth()
+/* 0x000DD06A 2200002042    IL_0342: ldc.r4    40
+/* 0x000DD06F 59            IL_0347: sub
+
+
+/* 0x000DD06A 2200002042    IL_0342: ldc.r4    164
+*/
+//DOES NOT WORK, UNFORTUNATELY
+   /* [HarmonyPatch(typeof(UITechNode), "UpdateLayoutDynamic")]
+    public static class UITechNode_Patch
+    {
+        [HarmonyDebug]
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            CodeMatcher match = new CodeMatcher(instructions)
+                .MatchForward(false, // false = move at the start of the match, true = move at the end of the match
+                    new CodeMatch(OpCodes.Ldarg_0),
+                    new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(UITechNode), "unlockText")),
+                    new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(Text), "get_preferredWidth")),
+                    new CodeMatch(OpCodes.Ldc_R4, 40),
+                    new CodeMatch(OpCodes.Sub)).Advance(5) // Move cursor to Sub
+                .InsertAndAdvance(
+                    new CodeInstruction(OpCodes.Pop),
+                    new CodeInstruction(OpCodes.Ldc_R4, 164)
+                );
+            var codes = new List<CodeInstruction>(match.InstructionEnumeration());
+            DspFontPatcher.logger.LogInfo(codes);
+            DspFontPatcher.logger.LogInfo(match.IsValid);
+            
+            return match.InstructionEnumeration();
+        }
+    }*/
 }
