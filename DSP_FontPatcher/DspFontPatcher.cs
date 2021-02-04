@@ -207,11 +207,17 @@ namespace DspFontPatcher
     static class ProductEntryPatch
     {
         [HarmonyPostfix]
-        static void Postfix(UIProductEntry __instance, Text ___consumeLabel)
+        static void Postfix(UIProductEntry __instance, Text ___consumeLabel, Text ___productText, Text ___consumeText, Text ___chargeCapacityText, Text ___energyConsumptionText)
         {
             DspFontPatcher.logDebug("Patching UIProductEntry");
 
             ___consumeLabel.horizontalOverflow = HorizontalWrapMode.Overflow;
+            
+            ___productText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            ___consumeText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            
+            if (___chargeCapacityText != null) ___chargeCapacityText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            if (___energyConsumptionText != null) ___energyConsumptionText.horizontalOverflow = HorizontalWrapMode.Overflow;
 
             Text[] allFields = __instance.GetComponentsInChildren<Text>();
             foreach (Text field in allFields)
