@@ -29,7 +29,6 @@ namespace DspFontPatcher
         public static ConfigEntry<bool> configFixFonts;
         public static ConfigEntry<bool> configDynamicSize;
 
-        // Awake is called once when both the game and the plug-in are loaded
         void Awake()
         {
             logger = Logger;
@@ -43,20 +42,18 @@ namespace DspFontPatcher
                 "OutputDebug",
                 false,
                 "If set to true, plugin will output some debug info to console");
-            
+
             configFixFonts = Config.Bind("General",
                 "FixFonts",
                 false,
                 "if true all fonts will be changed to specified font and dynamic sizing will be enabled too");
-            
+
             configDynamicSize = Config.Bind("General",
                 "DynamicSize",
                 true,
                 "if true some textboxes size will be changed to fit content");
 
             newFont = Font.CreateDynamicFontFromOSFont(configFontName.Value, 16);
-
-            // newFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
 
             logger.LogInfo("DSP Font Patcher is initialized!");
 
@@ -68,15 +65,15 @@ namespace DspFontPatcher
             {
                 configDynamicSize.Value = true;
                 logger.LogInfo("Font fixing is enabled!");
-            }else if (configDynamicSize.Value)
+            }
+            else if (configDynamicSize.Value)
             {
                 logger.LogInfo("Only dynamic sizing is enabled!");
             }
-            
+
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 
             SceneManager.sceneLoaded += LevelLoaded;
-            
         }
 
         public static void logDebug(String output)
@@ -93,6 +90,7 @@ namespace DspFontPatcher
             Invoke(nameof(FixLater), 5);
         }
 
+        //Change fonts
         private void FixLater()
         {
             if (DspFontPatcher.configFixFonts.Value)
@@ -105,7 +103,8 @@ namespace DspFontPatcher
             }
         }
     }
-
+    
+    //Change fonts
     [HarmonyPatch(typeof(Localizer), "Refresh")]
     static class LocalizerPatch
     {
@@ -121,7 +120,8 @@ namespace DspFontPatcher
             }
         }
     }
-
+    
+    //Change fonts
     [HarmonyPatch(typeof(UIItemTip), "SetTip")]
     static class ItemTipPatch
     {
@@ -141,7 +141,8 @@ namespace DspFontPatcher
             }
         }
     }
-
+    
+    //Change fonts
     [HarmonyPatch(typeof(UIRealtimeTip), "SetText")]
     static class UiTipPatch
     {
@@ -156,6 +157,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts and removing horizontal overflow for button tips
     [HarmonyPatch(typeof(UIButtonTip), "SetTip")]
     static class UiButtonTipPatch
     {
@@ -177,6 +179,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIKeyTipNode), nameof(UIKeyTipNode.SetKeyTip))]
     [HarmonyPatch(typeof(UIKeyTipNode), nameof(UIKeyTipNode.SetMouseTip))]
     [HarmonyPatch(typeof(UIKeyTipNode), nameof(UIKeyTipNode.SetCombineKeyTip))]
@@ -194,6 +197,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIEscMenu), "_OnOpen")]
     static class EscMenuPatch
     {
@@ -209,6 +213,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIComboBox), "Start")]
     static class ComboBoxPatch
     {
@@ -229,6 +234,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIButton), "Init")]
     static class ButtonPatch
     {
@@ -247,6 +253,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIProductEntry), "OnEntryCreated")]
     static class ProductEntryPatch
     {
@@ -277,6 +284,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(ManualBehaviour), "_Init")]
     static class ManualBehaviourPatch
     {
@@ -292,13 +300,13 @@ namespace DspFontPatcher
                 {
                     field.font = DspFontPatcher.newFont;
                 }
-
             }
 
             return true;
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIStationStorage), "_OnOpen")]
     static class UIStationStoragePatch
     {
@@ -322,6 +330,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIResAmountEntry), "SetInfo")]
     static class UIResAmountEntryPatch
     {
@@ -338,6 +347,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIAssemblerWindow), "_OnOpen")]
     static class UIAssemblerWindowPatch
     {
@@ -353,6 +363,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIPowerGeneratorWindow), "_OnOpen")]
     static class UIPowerGeneratorWindowPatch
     {
@@ -369,6 +380,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIStarmap), "_OnOpen")]
     static class UIStarmapPatch
     {
@@ -383,7 +395,8 @@ namespace DspFontPatcher
             }
         }
     }
-
+    
+    //Change fonts
     [HarmonyPatch(typeof(UIPlanetGlobe), "_OnOpen")]
     static class UIPlanetGlobePatch
     {
@@ -395,11 +408,11 @@ namespace DspFontPatcher
                 DspFontPatcher.logDebug("Patching UIStarmap");
 
                 ___geoInfoText.font = DspFontPatcher.newFont;
-                //___positionText3.font = DspFontPatcher.newFont;
             }
         }
     }
 
+    //Change fonts and adjusting tech nodes title position
     [HarmonyPatch(typeof(UITechNode), "_OnOpen")]
     static class UITechNodePatch
     {
@@ -417,7 +430,8 @@ namespace DspFontPatcher
                     rtrs.anchoredPosition = new Vector2(-5, 10);
                 }
             }
-
+            
+            
             if (DspFontPatcher.configFixFonts.Value)
             {
                 ___progressSpeedText.font = DspFontPatcher.newFont;
@@ -427,6 +441,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIMechaEnergy), "_OnCreate")]
     static class UIMechaEnergyPatch
     {
@@ -442,6 +457,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts and dynamic resizing of "run game" button
     [HarmonyPatch(typeof(UIDysonPanel), "_OnOpen")]
     static class UIDysonPanelPatch
     {
@@ -471,7 +487,8 @@ namespace DspFontPatcher
             }
         }
     }
-
+    
+    //Change fonts
     [HarmonyPatch(typeof(UIKeyEntry), "SetEntry")]
     static class UIOptionWindowPatch
     {
@@ -488,6 +505,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIAutoSave), "_OnOpen")]
     static class UIAutoSavePatch
     {
@@ -503,6 +521,7 @@ namespace DspFontPatcher
         }
     }
 
+    //Change fonts
     [HarmonyPatch(typeof(UIHandTip), "_OnOpen")]
     static class UIHandTipPatch
     {
@@ -517,7 +536,8 @@ namespace DspFontPatcher
             }
         }
     }
-
+    
+    //Change fonts
     [HarmonyPatch(typeof(UITutorialWindow), "_OnOpen")]
     static class UITutorialWindowPatch
     {
@@ -526,7 +546,7 @@ namespace DspFontPatcher
         {
             if (DspFontPatcher.configFixFonts.Value)
             {
-                DspFontPatcher.logger.LogInfo("Patching UITutorialWindow");
+                DspFontPatcher.logDebug("Patching UITutorialWindow");
 
                 ___titleText.font = DspFontPatcher.newFont;
                 ___preText.font = DspFontPatcher.newFont;
@@ -534,7 +554,8 @@ namespace DspFontPatcher
             }
         }
     }
-
+    
+    //Change fonts
     [HarmonyPatch(typeof(UITutorialListEntry), "SetText")]
     static class UITutorialListEntryPatch
     {
@@ -543,7 +564,7 @@ namespace DspFontPatcher
         {
             if (DspFontPatcher.configFixFonts.Value)
             {
-                DspFontPatcher.logger.LogInfo("Patching UITutorialListEntry");
+                DspFontPatcher.logDebug("Patching UITutorialListEntry");
 
                 ___nameText.font = DspFontPatcher.newFont;
             }
@@ -556,7 +577,7 @@ namespace DspFontPatcher
         [HarmonyPostfix]
         static void Postfix(Text ___warningText, Image ___warningIcon)
         {
-            DspFontPatcher.logger.LogInfo("Patching UIGeneralTips");
+            DspFontPatcher.logDebug("Patching UIGeneralTips");
 
             if (DspFontPatcher.configFixFonts.Value)
                 ___warningText.font = DspFontPatcher.newFont;
@@ -566,7 +587,7 @@ namespace DspFontPatcher
         }
     }
 
-    //title-text
+    //fix research ui title position (Only needed when fonts are changed)
     [HarmonyPatch(typeof(UIResearchResultWindow), "_OnOpen")]
     static class UIResearchResultWindowPatch
     {
@@ -575,23 +596,21 @@ namespace DspFontPatcher
         {
             if (DspFontPatcher.configFixFonts.Value)
             {
-                DspFontPatcher.logger.LogInfo("Patching UIResearchResultWindow");
+                DspFontPatcher.logDebug("Patching UIResearchResultWindow");
 
                 Transform textTrs = ___contentGroup.transform.Find("title-text");
                 if (textTrs != null)
                 {
-                    DspFontPatcher.logger.LogInfo("Found text");
                     RectTransform rTrs = (RectTransform) textTrs;
                     Text title = textTrs.GetComponent<Text>();
                     title.font = DspFontPatcher.newFont;
                     title.horizontalOverflow = HorizontalWrapMode.Overflow;
-                    // rTrs.anchoredPosition = new Vector2(0, 48);
                 }
             }
         }
     }
 
-    //speedText
+    //Change fonts
     [HarmonyPatch(typeof(UILabWindow), "_OnOpen")]
     static class UILabWindowPatch
     {
@@ -600,13 +619,14 @@ namespace DspFontPatcher
         {
             if (DspFontPatcher.configFixFonts.Value)
             {
-                DspFontPatcher.logger.LogInfo("Patching UILabWindow");
+                DspFontPatcher.logDebug("Patching UILabWindow");
 
                 ___speedText.font = DspFontPatcher.newFont;
             }
         }
     }
 
+    //Fix icon position (Only needed when fonts are changed)
     [HarmonyPatch(typeof(UIGame), "_OnInit")]
     static class UIGamePatch
     {
@@ -615,7 +635,7 @@ namespace DspFontPatcher
         {
             if (DspFontPatcher.configFixFonts.Value)
             {
-                DspFontPatcher.logger.LogInfo("Patching UIGame");
+                DspFontPatcher.logDebug("Patching UIGame");
 
                 Image[] icons = __instance.GetComponentsInChildren<Image>(true);
 
@@ -630,18 +650,17 @@ namespace DspFontPatcher
         }
     }
 
+    //Mecha dynamic UI
     [HarmonyPatch(typeof(UIMechaWindow), "_OnOpen")]
     static class UIMechaWindowPatch
     {
-        
         [HarmonyPostfix]
         static void Postfix(UIMechaWindow __instance)
         {
-            DspFontPatcher.logger.LogInfo("Patching UIMechaWindow");
+            DspFontPatcher.logDebug("Patching UIMechaWindow");
 
             if (DspFontPatcher.configDynamicSize.Value)
             {
-
                 try
                 {
                     Transform t1 = __instance.transform.Find("mecha-group");
@@ -649,7 +668,7 @@ namespace DspFontPatcher
 
                     List<Text> values = new List<Text>();
                     List<Image> lines = new List<Image>();
-                    float maxWidth = 0;
+                    float maxWidth = 140;
 
                     foreach (Transform child in infTrs)
                     {
@@ -661,6 +680,8 @@ namespace DspFontPatcher
                         lines.Add(line);
                         values.Add(value);
                     }
+                    //Cap max extension
+                    maxWidth = Math.Min(maxWidth, 390);
 
                     for (int i = 0; i < values.Count; i++)
                     {
@@ -675,14 +696,15 @@ namespace DspFontPatcher
             }
         }
     }
-    
+
+    //Random tip dynamic resize
     [HarmonyPatch(typeof(UIRandomTip), "_OnOpen")]
     static class UIRandomTipPatch
     {
         [HarmonyPostfix]
         static void Postfix(RectTransform ___balloonTrans)
         {
-            DspFontPatcher.logger.LogInfo("Patching UIRandomTip");
+            DspFontPatcher.logDebug("Patching UIRandomTip");
 
             if (DspFontPatcher.configDynamicSize.Value)
             {
@@ -694,39 +716,78 @@ namespace DspFontPatcher
             }
         }
     }
-/*
-/* 0x000DD05F 02            IL_0337: ldarg.0
-/* 0x000DD060 7B1E190004    IL_0338: ldfld     class [UnityEngine.UI]UnityEngine.UI.Text UITechNode::unlockText
-/* 0x000DD065 6FD405000A    IL_033D: callvirt  instance float32 [UnityEngine.UI]UnityEngine.UI.Text::get_preferredWidth()
-/* 0x000DD06A 2200002042    IL_0342: ldc.r4    40
-/* 0x000DD06F 59            IL_0347: sub
+    
+    //Tech tree node bugfix
+    [HarmonyPatch(typeof(UITechNode), "UpdateLayoutDynamic")]
+    public static class UITechNodePatch2
+    {
+        //Fixes tech nodes being oversized when unlockText is long. (Game devs seem to put \n in unlockText to fix this) 
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var codes = instructions.ToList();
 
+            if (DspFontPatcher.configDynamicSize.Value)
+            {
+                DspFontPatcher.logDebug("Patching UITechNode");
+                for (int i = 0; i < codes.Count; i++)
+                {
+                    if (codes[i].opcode == OpCodes.Callvirt &&
+                        ((MethodInfo) codes[i].operand).Name == "get_preferredWidth")
+                    {
+                        codes[i] = Transpilers.EmitDelegate<Func<Text, float>>(text =>
+                            text.text.Equals("") ? 0f : 164f);
+                        codes[i + 1].opcode = OpCodes.Nop;
+                        codes[i + 1].operand = null;
+                        codes[i + 2].opcode = OpCodes.Nop;
+                        codes[i + 2].operand = null;
+                        break;
+                    }
+                }
+            }
 
-/* 0x000DD06A 2200002042    IL_0342: ldc.r4    164
-*/
-//DOES NOT WORK, UNFORTUNATELY
-    /* [HarmonyPatch(typeof(UITechNode), "UpdateLayoutDynamic")]
-     public static class UITechNode_Patch
-     {
-         [HarmonyDebug]
-         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-         {
-             CodeMatcher match = new CodeMatcher(instructions)
-                 .MatchForward(false, // false = move at the start of the match, true = move at the end of the match
-                     new CodeMatch(OpCodes.Ldarg_0),
-                     new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(UITechNode), "unlockText")),
-                     new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(Text), "get_preferredWidth")),
-                     new CodeMatch(OpCodes.Ldc_R4, 40),
-                     new CodeMatch(OpCodes.Sub)).Advance(5) // Move cursor to Sub
-                 .InsertAndAdvance(
-                     new CodeInstruction(OpCodes.Pop),
-                     new CodeInstruction(OpCodes.Ldc_R4, 164)
-                 );
-             var codes = new List<CodeInstruction>(match.InstructionEnumeration());
-             DspFontPatcher.logger.LogInfo(codes);
-             DspFontPatcher.logger.LogInfo(match.IsValid);
-             
-             return match.InstructionEnumeration();
-         }
-     }*/
+            return codes.AsEnumerable();
+        }
+    }
+    
+    //tech tree info panel dynamic resizing
+    [HarmonyPatch(typeof(UITechTree), "OnPageChanged")]
+    static class UITechTreePatch
+    {
+        [HarmonyPostfix]
+        static void Postfix(RectTransform ___dataValueGroup)
+        {
+            DspFontPatcher.logDebug("Patching UITechTree");
+
+            if (DspFontPatcher.configDynamicSize.Value)
+            {
+                Text label = ___dataValueGroup.Find("label").GetComponent<Text>();
+                Text value = ___dataValueGroup.Find("value").GetComponent<Text>();
+                float thisWidth = label.preferredWidth + value.preferredWidth + 70f;
+                ___dataValueGroup.offsetMin = new Vector2(-thisWidth, 0);
+            }
+        }
+    }
+    
+    //Player inventory bottom tip dynamic resizing
+    [HarmonyPatch(typeof(UIStorageGrid), "_OnOpen")]
+    static class UIStorageGridPatch
+    {
+        [HarmonyPostfix]
+        static void Postfix(UIStorageGrid __instance)
+        {
+            if (DspFontPatcher.configDynamicSize.Value)
+            {
+                if (__instance.name.ToLower().Contains("player"))
+                {
+                    DspFontPatcher.logDebug("Patching Player inventory");
+                    
+                    RectTransform trs = (RectTransform)__instance.transform.Find("panel-bg");
+                    Text tip = trs.Find("tip-text").GetComponent<Text>();
+                    tip.verticalOverflow = VerticalWrapMode.Overflow;
+                    trs.offsetMin = new Vector2(-42, -31 - tip.preferredHeight);
+                }
+            }
+        }
+    }
 }
